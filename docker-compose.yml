@@ -4,10 +4,7 @@ networks:
 services:
 
   database-postgres:
-#    build:
-#      context: ./postgres
-#      dockerfile: Dockerfile
-    container_name: booking-postgres
+    container_name: booking-postgresql
     image: postgres:alpine
     restart: always
     tty: true
@@ -15,10 +12,8 @@ services:
       POSTGRES_DB: booking
       POSTGRES_USER: docker
       POSTGRES_PASSWORD: docker
-
     ports:
-      - "5432:5432"
-
+      - "5430:5432"
     logging:
       options:
         max-size: 10m
@@ -27,11 +22,11 @@ services:
       - laravel
 
   webserver:
-    image: nginx:latest
+    image: nginx:stable
     container_name: e-mehmon-booking
     restart: always
     ports:
-      - "8088:80"
+      - "8080:80"
     volumes:
       - ./www/e-mehmon-booking:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -39,8 +34,8 @@ services:
       - php
       - database-postgres
     links:
-    - php
-    - database-postgres
+      - php
+      - database-postgres
     networks:
       - laravel
 
@@ -57,6 +52,7 @@ services:
     command: >
       bash -c "true
       && composer install
+      && cp .env.example .env
       && php artisan key:generate
       && php artisan migrate
       && docker-php-entrypoint php-fpm
@@ -67,10 +63,10 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-postgres@uzinfocom.uz}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-postgres}
+      PGADMIN_DEFAULT_EMAIL: postgres@uzinfocom.uz
+      PGADMIN_DEFAULT_PASSWORD: postgres
     ports:
-      - "5050:80"
+      - "8081:80"
     networks:
       - laravel
 volumes:
